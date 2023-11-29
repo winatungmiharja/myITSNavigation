@@ -114,15 +114,76 @@ function calculateAndDisplayRoute(
       if (status === "OK") {
         // @hasna disini response nya
         let path = response.routes[0].overview_path;
-        console.log(path.map((p) => ({ lat: p.lat(), lng: p.lng() })));
+        let lat = path.map((p) => (p.lat()));
+        let lon = path.map((p) => ( p.lng()));
+        sessionStorage.setItem("lat", JSON.stringify(lat));
+        sessionStorage.setItem("lon", JSON.stringify(lon));
+        console.log(lat);
+        console.log(lon);
         directionsDisplay.setDirections(response);
         displayPathElevation(path, elevator);
+        showARButton();
       } else {
         window.alert("Directions request failed due to " + status);
       }
     }
   );
 }
+
+function showARButton(){
+  var ARButton = document.getElementById("ARButton");
+  ARButton.innerHTML = "";
+  var showARBtn = document.createElement("a");
+  showARBtn.className = "btn btn-default btn-sm float-right";
+  showARBtn.href = "../arpage.html"
+  // showARBtn.addEventListener("click", function () {
+  //   window.onload = () => {
+  //     let places = staticLoadPlaces();
+  //     renderPlaces(places);
+  //    };
+  // });
+  showARBtn.appendChild(document.createTextNode("show AR mode"));
+  var text = document.createElement("strong");
+  text.appendChild(document.createTextNode("  "));
+  text.appendChild(showARBtn);
+  var div = document.createElement("div");
+  div.className = "well";
+  div.appendChild(text);
+  bookmarksResults.appendChild(div);
+}
+
+
+// function staticLoadPlaces() {
+//   return [
+//       {
+//           name: 'Magnemite',
+//           location: {
+//               lat: -7.2892116,
+//               lng: 112.7969294,
+//           }
+//       },
+//   ];
+// }
+
+// function renderPlaces(places) {
+//   let scene = document.querySelector('a-scene');
+
+//   places.forEach((place) => {
+//       let latitude = place.location.lat;
+//       let longitude = place.location.lng;
+
+//       let model = document.createElement('a-box');
+//       model.setAttribute('gps-new-entity-place', `latitude: ${latitude}; longitude: ${longitude};`);
+//       model.setAttribute('material', { color: 'blue' } );
+//       model.setAttribute('scale', '0.5 0.5 0.5');
+
+//       model.addEventListener('loaded', () => {
+//           window.dispatchEvent(new CustomEvent('gps-entity-place-loaded'))
+//       });
+
+//       scene.appendChild(model);
+//   });
+// }
 
 function displayPathElevation(path, elevator) {
   elevator.getElevationAlongPath(

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>myITS AR Navigation</title>
+     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script type='text/javascript' src='https://raw.githack.com/AR-js-org/AR.js/master/three.js/build/ar-threex-location-only.js'></script>
+    <script type='text/javascript' src='https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js'></script>
+
+    <script type='text/javascript' src="js/script.js"></script>
+</head>
+
+<body style='margin: 0; overflow: hidden;'>
+    <a-scene
+    vr-mode-ui='enabled: false' arjs='sourceType: webcam; videoTexture: true; debugUIEnabled: false' renderer='antialias: true; alpha: true'>
+        <a-camera gps-new-camera rotation-reader></a-camera>
+        <a-assets>
+            <a-asset-item
+                id="arrow"
+                src="assets/arrow.glb"
+            ></a-asset-item>
+            <a-asset-item
+                id="location"
+                src="assets/location.gltf"
+            ></a-asset-item>
+        </a-assets>
+	    <script>
+	        AFRAME.registerComponent('look-at', {
+	          schema: { type: 'selector' },
+	        
+	          init: function () {},
+	        
+	          tick: function () {
+	            this.el.object3D.lookAt(this.data.object3D.position)
+	          }
+	        })
+    	</script>
+	</a-scene>
+</body>
