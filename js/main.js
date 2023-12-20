@@ -94,6 +94,7 @@ function initMap() {
     calculateAndDisplayRoute(directionsService, directionsDisplay, elevator);
   };
   document.getElementById("route").addEventListener("click", onChangeHandler);
+
   directionsDisplay.setMap(map);
 
   fetchBookmarks(true);
@@ -106,23 +107,21 @@ function calculateAndDisplayRoute(
 ) {
   directionsService.route(
     {
-      origin: document.getElementById("start-select").value,
-      destination: document.getElementById("end-select").value,
+      origin: document.getElementById("start-input").value,
+      destination: document.getElementById("end-input").value,
       travelMode: "WALKING",
     },
     function (response, status) {
       if (status === "OK") {
         // @hasna disini response nya
         let path = response.routes[0].overview_path;
-        let lat = path.map((p) => (p.lat()));
-        let lon = path.map((p) => ( p.lng()));
+        let lat = path.map((p) => p.lat());
+        let lon = path.map((p) => p.lng());
         sessionStorage.setItem("lat", JSON.stringify(lat));
         sessionStorage.setItem("lon", JSON.stringify(lon));
-        console.log(lat);
-        console.log(lon);
         directionsDisplay.setDirections(response);
-        displayPathElevation(path, elevator);
-        showARButton();
+        afterSubmit();
+        showNavigationControls();
       } else {
         window.alert("Directions request failed due to " + status);
       }
@@ -130,69 +129,40 @@ function calculateAndDisplayRoute(
   );
 }
 
-function showARButton(){
-  var ARButton = document.getElementById("ARButton");
-  ARButton.innerHTML = "";
-  var showARBtn = document.createElement("a");
-  showARBtn.className = "btn btn-default btn-sm float-right";
-  showARBtn.href = "../arpage.html"
-  // showARBtn.addEventListener("click", function () {
-  //   window.onload = () => {
-  //     let places = staticLoadPlaces();
-  //     renderPlaces(places);
-  //    };
-  // });
-  showARBtn.appendChild(document.createTextNode("show AR mode"));
-  var text = document.createElement("strong");
-  text.appendChild(document.createTextNode("  "));
-  text.appendChild(showARBtn);
-  var div = document.createElement("div");
-  div.className = "well";
-  div.appendChild(text);
-  bookmarksResults.appendChild(div);
+function showNavigationControls() {
+  var navigationControls = document.getElementById("navigationControls");
+  navigationControls.style.display = "flex";
+  var onCancel = function () {
+    cancelNavigation();
+  };
+  document.getElementById("cancel").addEventListener("click", onCancel);
 }
 
+function cancelNavigation() {
+  var routeButton = document.getElementById("route");
+  var startInput = document.getElementById("start-input");
+  var endInput = document.getElementById("end-input");
+  var navigationControls = document.getElementById("navigationControls");
 
-// function staticLoadPlaces() {
-//   return [
-//       {
-//           name: 'Magnemite',
-//           location: {
-//               lat: -7.2892116,
-//               lng: 112.7969294,
-//           }
-//       },
-//   ];
-// }
+  navigationControls.style.display = "none";
 
-// function renderPlaces(places) {
-//   let scene = document.querySelector('a-scene');
+  startInput.style.pointerEvents = "auto";
+  startInput.value = "";
+  endInput.style.pointerEvents = "auto";
+  endInput.value = "";
 
-//   places.forEach((place) => {
-//       let latitude = place.location.lat;
-//       let longitude = place.location.lng;
+  routeButton.style.display = "flex";
+}
 
-//       let model = document.createElement('a-box');
-//       model.setAttribute('gps-new-entity-place', `latitude: ${latitude}; longitude: ${longitude};`);
-//       model.setAttribute('material', { color: 'blue' } );
-//       model.setAttribute('scale', '0.5 0.5 0.5');
+function afterSubmit() {
+  var routeButton = document.getElementById("route");
+  var startInput = document.getElementById("start-input");
+  var endInput = document.getElementById("end-input");
 
-//       model.addEventListener('loaded', () => {
-//           window.dispatchEvent(new CustomEvent('gps-entity-place-loaded'))
-//       });
+  startInput.style.pointerEvents = "none";
+  endInput.style.pointerEvents = "none";
 
-//       scene.appendChild(model);
-//   });
-// }
-
-function displayPathElevation(path, elevator) {
-  elevator.getElevationAlongPath(
-    {
-      path: path,
-      samples: 256,
-    },
-    plotElevation
-  );
+  routeButton.style.display = "none";
 }
 
 function plotElevation(elevations, status) {

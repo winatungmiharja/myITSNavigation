@@ -4,81 +4,257 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Google Map Marker</title>
+    <title>myITSNavigation</title>
 
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
-      crossorigin="anonymous"
-    />
     <link href="css/style.css" rel="stylesheet" />
+
     <script src="https://www.google.com/jsapi"></script>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              primary: ["Inter"],
+            },
+            colors: {
+              primary: "#545F71",
+              secondary: "#9BA5B7",
+              tertiary: "#EEF1F4",
+              accent: "#F6BE2C",
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer base {
+        html {
+          scroll-behavior: smooth !important;
+          /* With scroll padding, the text will scroll 1 rem below the navigation bar and banner (which total height is 64px + 4rem). */
+          scroll-padding: calc(64px + 4rem + 1rem);
+        }
+
+        /* #region  /**=========== Fonts =========== */
+        @font-face {
+          font-family: "Inter";
+          font-style: normal;
+          font-weight: 100 900;
+          font-display: optional;
+          src: url("./fonts/inter-var-latin.woff2") format("woff2");
+          unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+            U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193,
+            U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+        /* #endregion  /**======== Fonts =========== */
+
+        .cursor-newtab {
+          cursor: url("/images/new-tab.png") 10 10, pointer;
+        }
+
+        /* #region  /**=========== Typography =========== */
+        .j1 {
+          @apply font-primary text-4xl font-bold;
+        }
+        .j2 {
+          @apply font-primary text-3xl font-bold;
+        }
+        .h1 {
+          @apply font-primary text-2xl font-semibold;
+        }
+        .h2 {
+          @apply font-primary text-xl font-semibold;
+        }
+        .h3 {
+          @apply font-primary text-lg font-semibold;
+        }
+        .h4 {
+          @apply font-primary text-base font-bold;
+        }
+        .h5 {
+          @apply font-primary text-base font-semibold;
+        }
+        .h6 {
+          @apply font-primary text-sm font-semibold;
+        }
+        .s1 {
+          @apply text-lg font-medium;
+        }
+        .s2 {
+          @apply text-base font-medium;
+        }
+        .s3 {
+          @apply text-sm font-medium;
+        }
+        .s4 {
+          @apply text-xs font-medium;
+        }
+        .b1 {
+          @apply text-lg font-normal;
+        }
+        .b2 {
+          @apply text-base font-normal;
+        }
+        .b3 {
+          @apply text-sm font-normal;
+        }
+        .c1 {
+          @apply text-xs;
+        }
+        .c2 {
+          @apply text-[11px] leading-[14px];
+        }
+        /* #endregion  /**======== Typography =========== */
+
+        body {
+          font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
+            "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+            "Helvetica Neue", sans-serif;
+        }
+
+        input {
+          outline: none;
+          border: 0;
+          padding-left: 0;
+        }
+
+        input:focus {
+          outline: none;
+          border-radius: 0.5em;
+        }
+
+        .layout {
+          /* 1100px */
+          max-width: 68.75rem;
+          @apply mx-auto w-10/12;
+        }
+
+        .bg-dark a.custom-link {
+          @apply border-gray-200 hover:border-gray-200/0;
+        }
+
+        /* Class to adjust with sticky footer */
+        .min-h-main {
+          @apply min-h-[calc(100vh-64px-4rem)];
+        }
+      }
+    </style>
   </head>
 
   <body onload="fetchBookmarks()">
-    <div class="container">
-      <div class="header clearfix">
-        <h3 class="text-muted">Google Map Navigation AR</h3>
+    <div>
+      <div class="my-12 layout">
+        <h1 class="j2 text-primary">Selamat Datang,</h1>
+        <h2 class="b2 text-primary mt-1">Ingin pergi kemana hari ini?</h2>
       </div>
 
-      <!-- Map marker address input box -->
-      <div class="jumbotron">
-        <h4>Masukkan alamat dibawah ini untuk menambahkan titik ke peta</h4>
-        <form id="location-form">
-          <h5 class="text-left">Alamat :</h5>
-          <input
-            type="text"
-            id="address-input"
-            class="form-control form-control-lg"
-            placeholder="Teknik Informatika ITS"
-          />
-          <br />
-          <button type="submit" class="btn btn-primary btn-block">
-            Simpan
+      <!-- Rute -->
+      <div class="bg-tertiary pb-8 pt-0">
+        <div class="layout rounded-lg overflow-hidden -translate-y-8">
+          <div id="map"></div>
+        </div>
+
+        <div class="layout flex flex-col gap-4">
+          <div class="bg-white flex gap-4 p-4 rounded-xl items-center">
+            <h1
+              class="bg-primary w-10 h-10 shrink-0 inline-flex items-center justify-center text-white rounded-full p-1"
+            >
+              A
+            </h1>
+            <div>
+              <label class="b3 text-primary" for="start-input"> Asal </label>
+              <input
+                class="appearance-none border-none outline-none placeholder:font-normal placeholder:text-secondary rounded-md w-full p-0 text-primary font-semibold leading-tight focus:outline-none"
+                id="start-input"
+                type="text"
+                placeholder="Masukkan Asal Rute"
+              />
+            </div>
+          </div>
+          <div class="bg-white flex gap-4 p-4 rounded-xl items-center">
+            <h1
+              class="bg-secondary w-10 h-10 shrink-0 inline-flex items-center justify-center text-white rounded-full p-1"
+            >
+              B
+            </h1>
+            <div>
+              <label class="b3 text-primary" for="end-input"> Tujuan </label>
+              <input
+                class="appearance-none border-none outline-none placeholder:font-normal placeholder:text-secondary rounded-md w-full p-0 text-primary font-semibold leading-tight focus:outline-none"
+                id="end-input"
+                type="text"
+                placeholder="Masukkan Tujuan Rute"
+              />
+            </div>
+          </div>
+          <button
+            id="route"
+            class="bg-primary text-white py-2 w-full flex rounded-lg justify-center gap-2"
+          >
+            <p class="b2">Mulai Navigasi</p>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              data-slot="icon"
+              class="w-6 h-6"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"
+              />
+            </svg>
           </button>
-        </form>
-      </div>
-      <!-- Google map -->
-      <div id="wrapper">
-        <div id="floating-panel">
-          <b>Asal : </b>
-          <select id="start-select">
-            <option value="" selected disabled>Lokasi Asal</option>
-          </select>
-          <!--<input type="text" id="start-input" placeholder="123 Fake St.">-->
-          <b>Tujuan : </b>
-          <select id="end-select">
-            <option value="" selected disabled>Lokasi Tujuan</option>
-          </select>
-          <!--<input type="text" id="end-input" placeholder="123 Fake St.">-->
-          <button id="route">Mulai Navigasi</button>
-        </div>
-        <div class="jumbotron" id="map"></div>
-        <div
-          id="directionsPanel"
-          style="float: right; width: 30%; height: 100%"
-        ></div>
-      </div>
-
-      <!-- Elevation Chart -->
-      <div id="elevation_chart"></div>
-
-      <!-- AR Button -->
-      <div class="row marketing">
-        <div class="col-lg-12">
-          <div id="ARButton"></div>
-        </div>
-      </div>
-      
-      <!-- Bookmarks -->
-      <div class="row marketing">
-        <div class="col-lg-12">
-          <div id="bookmarksResults"></div>
+          <div class="flex gap-2" id="navigationControls" style="display: none">
+            <button
+              id="cancel"
+              class="bg-primary text-white p-2 w-fit inline-flex rounded-lg justify-center gap-2"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                data-slot="icon"
+                class="w-6 h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M6 18 18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <a
+              href="../arpage.html"
+              class="bg-accent text-primary py-2 w-full flex rounded-lg justify-center gap-2"
+            >
+              <p class="b2 font-bold">Mulai AR</p>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                data-slot="icon"
+                class="w-6 h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"
+                />
+              </svg>
+            </a>
+          </div>
         </div>
       </div>
     </div>
-    <!-- /container -->
 
     <script
       src="https://code.jquery.com/jquery-3.1.1.js"
